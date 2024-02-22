@@ -70,6 +70,12 @@ pub enum NovaError {
   /// returned when the prover cannot prove the provided statement due to completeness error
   #[error("InternalError")]
   InternalError,
+  /// returned when the verifier key or commitments cannot be serialized into JSON
+  #[error("JsonSerializationError")]
+  JsonSerializeError,
+  /// returned when the verifier key or commitments cannot be written to the inputted file
+  #[error("FileWriteError")]
+  FileWriteError,
 }
 
 /// Errors specific to the Polynomial commitment scheme
