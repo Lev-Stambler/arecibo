@@ -1346,6 +1346,7 @@ impl<E: Engine, EE: EvaluationEngineTrait<E>> RelaxedR1CSSNARKTrait<E>
   type ProverKey = ProverKey<E, EE>;
 
   type VerifierKey = VerifierKey<E, EE>;
+  type EvaluationArguments = EE::EvaluationArgument;
 
   fn ck_floor() -> Box<dyn for<'a> Fn(&'a R1CSShape<E>) -> usize> {
     <Self as BatchedRelaxedR1CSSNARKTrait<E>>::ck_floor()
@@ -1374,5 +1375,9 @@ impl<E: Engine, EE: EvaluationEngineTrait<E>> RelaxedR1CSSNARKTrait<E>
   fn verify(&self, vk: &Self::VerifierKey, U: &RelaxedR1CSInstance<E>) -> Result<(), NovaError> {
     let slice = slice::from_ref(U);
     <Self as BatchedRelaxedR1CSSNARKTrait<E>>::verify(self, vk, slice)
+  }
+
+  fn clone_evaluation_argument(&self) -> Self::EvaluationArguments {
+    self.eval_arg.clone()
   }
 }

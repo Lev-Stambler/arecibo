@@ -92,6 +92,7 @@ pub struct RelaxedR1CSSNARK<E: Engine, EE: EvaluationEngineTrait<E>> {
 impl<E: Engine, EE: EvaluationEngineTrait<E>> RelaxedR1CSSNARKTrait<E> for RelaxedR1CSSNARK<E, EE> {
   type ProverKey = ProverKey<E, EE>;
   type VerifierKey = VerifierKey<E, EE>;
+  type EvaluationArguments = EE::EvaluationArgument;
 
   fn setup(
     ck: Arc<CommitmentKey<E>>,
@@ -410,6 +411,10 @@ impl<E: Engine, EE: EvaluationEngineTrait<E>> RelaxedR1CSSNARKTrait<E> for Relax
     )?;
 
     Ok(())
+  }
+
+  fn clone_evaluation_argument(&self) -> Self::EvaluationArguments {
+    self.eval_arg.clone()
   }
 }
 

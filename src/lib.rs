@@ -788,19 +788,6 @@ where
   vk_secondary: S2::VerifierKey,
 }
 
-/// A type that holds input specific values for `CompressedSNARK` verification
-#[derive(Debug, Serialize)]
-#[serde(bound = "")]
-pub struct VerifierInstance<E1>
-where
-  E1: CurveCycleEquipped,
-{
-  ck_primary: Arc<CommitmentKey<E1>>,
-  ck_secondary: Arc<CommitmentKey<Dual<E1>>>,
-  z0_primary: Vec<E1::Scalar>,
-  z0_secondary: Vec<<Dual<E1> as Engine>::Scalar>,
-}
-
 /// A SNARK that proves the knowledge of a valid `RecursiveSNARK`
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(bound = "")]
@@ -1009,14 +996,17 @@ where
     vk_save_path: &Path,
     inp_save_path: &Path,
     vk: &VerifierKey<E1, S1, S2>,
-    instance: &VerifierInstance<E1>,
+    snark: S1,
   ) -> Result<(), NovaError> {
     let vk_json: String = serde_json::to_string(vk).map_err(|_| NovaError::JsonSerializeError)?;
+    println!("TODO: remove me instance: {}", &vk_json);
     fs::write(vk_save_path, vk_json).map_err(|_| NovaError::FileWriteError)?;
 
-    let instance: String =
-      serde_json::to_string(instance).map_err(|_| NovaError::JsonSerializeError)?;
-    fs::write(inp_save_path, instance).map_err(|_| NovaError::FileWriteError)?;
+    let instance = snark.clone_evaluation_argument();
+    let instance_json: String =
+      serde_json::to_string(&instance).map_err(|_| NovaError::JsonSerializeError)?;
+    println!("TODO: remove me instance: {}", &instance_json);
+    fs::write(inp_save_path, instance_json).map_err(|_| NovaError::FileWriteError)?;
     Ok(())
   }
 }
@@ -1482,16 +1472,16 @@ mod tests {
 
   #[test]
   fn test_ivc_nontrivial_with_batched_spark_compression() {
-    // test_ivc_nontrivial_with_batched_spark_compression_with::<PallasEngine, EE<_>, EE<_>>();
+    test_ivc_nontrivial_with_batched_spark_compression_with::<PallasEngine, EE<_>, EE<_>>();
     test_ivc_nontrivial_with_batched_spark_compression_with::<Bn256EngineIPA, EE<_>, EE<_>>();
-    // test_ivc_nontrivial_with_batched_spark_compression_with::<Secp256k1Engine, EE<_>, EE<_>>();
-    // test_ivc_nontrivial_with_batched_spark_compression_with::<Bn256EngineZM, ZMPCS<Bn256, _>, EE<_>>(
-    // );
-    // test_ivc_nontrivial_with_batched_spark_compression_with::<
-    //   Bn256EngineKZG,
-    //   provider::hyperkzg::EvaluationEngine<Bn256, _>,
-    //   EE<_>,
-    // >();
+    test_ivc_nontrivial_with_batched_spark_compression_with::<Secp256k1Engine, EE<_>, EE<_>>();
+    test_ivc_nontrivial_with_batched_spark_compression_with::<Bn256EngineZM, ZMPCS<Bn256, _>, EE<_>>(
+    );
+    test_ivc_nontrivial_with_batched_spark_compression_with::<
+      Bn256EngineKZG,
+      provider::hyperkzg::EvaluationEngine<Bn256, _>,
+      EE<_>,
+    >();
   }
 
   fn test_ivc_nondet_with_compression_with<E1, EE1, EE2>()
@@ -1611,24 +1601,6 @@ mod tests {
     // verify the compressed SNARK
     let res = compressed_snark.verify(&vk, num_steps, &z0_primary, &z0_secondary);
 
-    let temp_file_vk = NamedTempFile::new().expect("Failed to create temp file for the verification key");
-    let temp_file_instance = NamedTempFile::new().expect("Failed to create temp file for the instance");
-    let input_instance = VerifierInstance::<E1> {
-      ck_primary: pp.ck_primary.clone(),
-      ck_secondary: pp.ck_secondary.clone(),
-      z0_primary: z0_primary.clone(),
-      z0_secondary: z0_secondary.clone(),
-    };
-    compressed_snark.to_verification_json(
-      temp_file_vk.path(),
-      temp_file_instance.path(),
-      &vk,
-      &input_instance,
-    ).expect("Failed to write verification key and instance to temp files");
-
-    println!("TODO REMOVE ME, written to {:?} {:?}", temp_file_vk.path(), temp_file_instance.path());
-
-    // Write the verifier key and inputs to a temporary file
     assert!(res.is_ok());
   }
 

@@ -28,6 +28,9 @@ pub trait RelaxedR1CSSNARKTrait<E: Engine>:
   /// A type that represents the verifier's key
   type VerifierKey: Send + Sync + Serialize;
 
+  /// A type that represents the evaluation arguments
+  type EvaluationArguments: Send + Sync + Serialize;
+
   /// This associated function (not a method) provides a hint that offers
   /// a minimum sizing cue for the commitment key used by this SNARK
   /// implementation. The commitment key passed in setup should then
@@ -54,6 +57,9 @@ pub trait RelaxedR1CSSNARKTrait<E: Engine>:
 
   /// Verifies a SNARK for a relaxed R1CS
   fn verify(&self, vk: &Self::VerifierKey, U: &RelaxedR1CSInstance<E>) -> Result<(), NovaError>;
+
+  /// Get evaluation arguments
+  fn clone_evaluation_argument(&self) -> Self::EvaluationArguments;
 }
 
 /// A trait that defines the behavior of a `zkSNARK` to prove knowledge of satisfying witness to batches of relaxed R1CS instances.
@@ -101,3 +107,12 @@ pub trait DigestHelperTrait<E: Engine> {
   /// Returns the digest of the verifier's key
   fn digest(&self) -> E::Scalar;
 }
+
+// /// A trait providing a function for getting the serialized initial parameters for verifying a SNARK
+// pub trait SerializableDigestInit<E: Engine> {
+//   /// The type holding the initial digest
+//   type InitialDigest: Serialize + for<'de> Deserialize<'de>;
+
+//   /// Get the initial digest for the verification process
+//   fn get_initial_digest(&self, expected: usize) -> Result<(), NovaError>;
+// }
