@@ -107,12 +107,3 @@ pub trait DigestHelperTrait<E: Engine> {
   /// Returns the digest of the verifier's key
   fn digest(&self) -> E::Scalar;
 }
-
-// /// A trait providing a function for getting the serialized initial parameters for verifying a SNARK
-// pub trait SerializableDigestInit<E: Engine> {
-//   /// The type holding the initial digest
-//   type InitialDigest: Serialize + for<'de> Deserialize<'de>;
-
-//   /// Get the initial digest for the verification process
-//   fn get_initial_digest(&self, expected: usize) -> Result<(), NovaError>;
-// }
